@@ -17,7 +17,9 @@ SELECT *
 FROM avg_sales ;
 ----2. Select the annual amount of product produced according to brands (use window functions).
 SELECT B.brand_name, P.model_year, P.product_id,
-COUNT(P.product_id) OVER(Partition By B.brand_name, P.model_year) AS annual_amount
+COUNT(P.product_id) 
+OVER(
+Partition By B.brand_name, P.model_year) AS annual_amount
 FROM product.brand B
 INNER JOIN product.product p
 ON B.brand_id = P.brand_id
