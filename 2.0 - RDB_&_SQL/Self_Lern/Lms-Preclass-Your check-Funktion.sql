@@ -208,3 +208,62 @@ Write a query using the window function that returns the cumulative total turnov
 Columns that should be listed are: 'order_date' in ascending order and 'Cumulative_Total_Price'.
 Burkes Outlet'in "2019-04-01" ve "2019-04-30" arasındaki sipariş tarihine göre kümülatif toplam cirolarını döndüren pencere işlevini kullanarak bir sorgu yazın. Listelenmesi gereken sütunlar: artan sırada 'order_date' ve 'Cumulative_Total_Price'.
 
+---Write a query using the window function that returns the cumulative total turnovers of the Burkes Outlet by order date between "2019-04-01" and "2019-04-30".
+---Columns that should be listed are: 'order_date' in ascending order and 'Cumulative_Total_Price'.
+with table3
+AS
+(
+SELECT DISTINCT SO.order_date,-- SO.order_id,
+			SUM(quantity*list_price) OVER (ORDER BY SO.order_date) as Total
+FROM		sale.store SS, sale.order_item OI, sale.orders SO
+WHERE		SS.store_id = SO.store_id
+AND			SO.order_id = OI.order_id
+AND			SS.store_name = 'Burkes Outlet'
+AND			SO.order_date BETWEEN '2019-04-01' AND '2019-04-30'
+) 
+Select distinct order_date, Total
+from table3
+--->Result>>>>
+2019-04-01	6785.84
+2019-04-04	7135.83
+2019-04-06	8176.30
+2019-04-21	11264.17
+2019-04-27	12043.93
+
+SELECT DISTINCT	SO.order_date,
+			sum(quantity*list_price) OVER (order by SO.order_date)
+FROM		sale.store SS, sale.order_item OI, sale.orders SO
+WHERE		SS.store_id = SO.store_id
+AND			SO.order_id = OI.order_id
+AND			SS.store_name = 'Burkes Outlet'
+AND			SO.order_date BETWEEN '2019-04-01' AND '2019-04-30'
+
+
+Write a query using the window function that returns staffs' first name, last name, and their total net amount of orders in descending order.
+
+(Use SampleRetail Database and paste your result in the box below.)
+Personelin adını, soyadını ve toplam net sipariş miktarını 
+azalan düzende döndüren pencere işlevini kullanarak bir sorgu yazın. (SampleRetail Database'i kullanın ve sonucunuzu aşağıdaki kutuya yapıştırın.)
+Window 2-
+SELECT DISTINCT	SS.first_name, SS.last_name, 
+			SUM(OI.quantity*OI.list_price*(1-OI.discount)) OVER (PARTITION BY SS.first_name) net_amount
+FROM		sale.staff SS, sale.order_item OI, sale.orders SO
+WHERE		SO.order_id = OI.order_id
+AND			SS.staff_id = SO.staff_id
+ORDER BY	3 DESC
+
+''' 2020'de çalışanın ilk sipariş tarihlerini aylara göre listeleyin. 
+Beklenen sütunlar şunlardır: ad, soyadı, ay ve ilk sipariş tarihi. 
+(artan sırada soyadı ve ay) (SampleRetail Database'i 
+kullanın ve sonucunuzu aşağıdaki kutuya yapıştırın.
+''''
+Window 3-
+SELECT DISTINCT	first_name, last_name, 
+			MONTH(order_date) [month],
+			FIRST_VALUE(order_date) OVER (PARTITION BY SS.staff_id, MONTH(order_date) ORDER BY order_date) first_order
+FROM		sale.staff SS, sale.orders SO
+WHERE		SS.staff_id = SO.staff_id
+AND			YEAR(SO.order_date) = 2020
+GROUP BY	first_name, last_name, SS.staff_id, order_date
+ORDER BY	2, 4
+;
